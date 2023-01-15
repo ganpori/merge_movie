@@ -27,7 +27,7 @@ def calc_file_mtime(path_file):
 
 def main():
     path_data_dir = Path("G:/DCIM/100GOPRO")
-    list_path_mp4 = [path for path in path_data_dir.glob("*.mp4")]
+    list_path_mp4 = [path for path in path_data_dir.glob("*.mp4").absolute()]
     list_path_mp4_sorted = sort_list_path_gopro_mp4(list_path_mp4=list_path_mp4)
 
     datetime_latest_file_mtime = calc_file_mtime(list_path_mp4_sorted[0])
