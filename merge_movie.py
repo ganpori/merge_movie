@@ -1,5 +1,6 @@
 import datetime
 from pathlib import Path
+import tempfile
 
 from moviepy import editor
 
@@ -27,8 +28,13 @@ def calc_file_mtime(path_file):
 
 def main():
     path_data_dir = Path("G:/DCIM/100GOPRO")
-    list_path_mp4 = [path for path in path_data_dir.glob("*.mp4").absolute()]
+    list_path_mp4 = [path.absolute() for path in path_data_dir.glob("*.mp4")]
     list_path_mp4_sorted = sort_list_path_gopro_mp4(list_path_mp4=list_path_mp4)
+    list_txt_str = [f"file {path}\n" for path in list_path_mp4_sorted]
+
+    with tempfile.TemporaryFile(mode="w+", encoding="utf-8", delete=False) as fp:
+        str_path_file_list_txt = fp.name
+        fp.writelines(list_txt_str)
 
     datetime_latest_file_mtime = calc_file_mtime(list_path_mp4_sorted[0])
     path_output_mp4 = Path(f"{datetime_latest_file_mtime.strftime('%Y%m%d')}.mp4")
