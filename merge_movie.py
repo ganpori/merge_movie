@@ -26,7 +26,7 @@ def calc_file_mtime(path_file):
 
 
 def main():
-    path_data_dir = Path("G:/DCIM/100GOPRO")
+    path_data_dir = Path("G:/DCIM/DJI_001")
     list_path_mp4 = [path.absolute() for path in path_data_dir.glob("*.mp4")]
 
     # ffmpegに与えるファイル一覧txtの作成
