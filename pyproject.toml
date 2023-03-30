@@ -6,7 +6,7 @@ authors = ["Taiki <taiki.iwahori.bn@furuno.co.jp>"]
 
 [tool.poetry.dependencies]
 python = "^3.11"
-black = "^22.10.0"
+black = "^23.3.0"
 
 [tool.poetry.dev-dependencies]
 
