@@ -13,6 +13,12 @@ from oauth2client.file import Storage
 from oauth2client.tools import argparser, run_flow
 
 
+"""
+公式サンプルページ:https://developers.google.com/youtube/v3/guides/uploading_a_video?hl=ja
+一番上に出てくる一通りそのまま説明してるところ:https://qiita.com/ny7760/items/5a728fd9e7b40588237c
+oauth2clientは非推奨なのでgoogle-authを使おうというやつ:https://dev.classmethod.jp/articles/oauth2client-is-deprecated/
+"""
+
 # Explicitly tell the underlying HTTP transport library not to retry, since
 # we are handling retry logic ourselves.
 httplib2.RETRIES = 1
