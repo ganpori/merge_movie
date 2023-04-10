@@ -1,17 +1,17 @@
 import http.client
 import httplib2
 import os
+import pickle
 import random
 import sys
 import time
 
-from apiclient.discovery import build
-from apiclient.errors import HttpError
-from apiclient.http import MediaFileUpload
-from oauth2client.client import flow_from_clientsecrets
-from oauth2client.file import Storage
-from oauth2client.tools import argparser, run_flow
-
+from googleapiclient.discovery import build
+from googleapiclient.errors import HttpError
+from googleapiclient.http import MediaFileUpload
+from google_auth_oauthlib.flow import InstalledAppFlow
+from google_auth_oauthlib.tools import argparser
+from google.auth.transport.requests import Request
 
 """
 公式サンプルページ:https://developers.google.com/youtube/v3/guides/uploading_a_video?hl=ja
@@ -85,22 +85,32 @@ VALID_PRIVACY_STATUSES = ("public", "private", "unlisted")
 
 
 def get_authenticated_service(args):
-    flow = flow_from_clientsecrets(
-        CLIENT_SECRETS_FILE,
-        scope=YOUTUBE_UPLOAD_SCOPE,
-        message=MISSING_CLIENT_SECRETS_MESSAGE,
-    )
-
-    storage = Storage("%s-oauth2.json" % sys.argv[0])
-    credentials = storage.get()
-
-    if credentials is None or credentials.invalid:
-        credentials = run_flow(flow, storage, args)
+    creds = None
+    # The file token.pickle stores the user's access and refresh tokens, and is
+    # created automatically when the authorization flow completes for the first
+    # time.
+    if os.path.exists("token.pickle"):
+        with open("token.pickle", "rb") as token:
+            creds = pickle.load(token)
+    # If there are no (valid) credentials available, let the user log in.
+    if not creds or not creds.valid:
+        if creds and creds.expired and creds.refresh_token:
+            creds.refresh(Request())
+        else:
+            flow = InstalledAppFlow.from_client_secrets_file(
+                CLIENT_SECRETS_FILE,
+                scope=YOUTUBE_UPLOAD_SCOPE,
+                message=MISSING_CLIENT_SECRETS_MESSAGE,
+            )
+            creds = flow.run_local_server(port=0)
+        # Save the credentials for the next run
+        with open("token.pickle", "wb") as token:
+            pickle.dump(creds, token)
 
     return build(
         YOUTUBE_API_SERVICE_NAME,
         YOUTUBE_API_VERSION,
-        http=credentials.authorize(httplib2.Http()),
+        credentials=creds,
     )
 
 
