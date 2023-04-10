@@ -3,7 +3,6 @@ import httplib2
 import os
 import pickle
 import random
-import sys
 import time
 
 from googleapiclient.discovery import build
@@ -84,7 +83,7 @@ https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
 VALID_PRIVACY_STATUSES = ("public", "private", "unlisted")
 
 
-def get_authenticated_service(args):
+def get_authenticated_service():
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -214,7 +213,7 @@ if __name__ == "__main__":
     if not os.path.exists(args.file):
         exit("Please specify a valid file using the --file= parameter.")
 
-    youtube = get_authenticated_service(args)
+    youtube = get_authenticated_service()
     try:
         initialize_upload(youtube, args)
     except HttpError as e:
