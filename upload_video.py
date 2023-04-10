@@ -60,25 +60,6 @@ YOUTUBE_UPLOAD_SCOPE = "https://www.googleapis.com/auth/youtube.upload"
 YOUTUBE_API_SERVICE_NAME = "youtube"
 YOUTUBE_API_VERSION = "v3"
 
-# This variable defines a message to display if the CLIENT_SECRETS_FILE is
-# missing.
-MISSING_CLIENT_SECRETS_MESSAGE = """
-WARNING: Please configure OAuth 2.0
-
-To make this sample run you will need to populate the client_secrets.json file
-found at:
-
-   %s
-
-with information from the API Console
-https://console.cloud.google.com/
-
-For more information about the client_secrets.json file format, please visit:
-https://developers.google.com/api-client-library/python/guide/aaa_client_secrets
-""" % os.path.abspath(
-    os.path.join(os.path.dirname(__file__), CLIENT_SECRETS_FILE)
-)
-
 VALID_PRIVACY_STATUSES = ("public", "private", "unlisted")
 
 
@@ -97,8 +78,7 @@ def get_authenticated_service():
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 CLIENT_SECRETS_FILE,
-                scope=YOUTUBE_UPLOAD_SCOPE,
-                message=MISSING_CLIENT_SECRETS_MESSAGE,
+                scopes=YOUTUBE_UPLOAD_SCOPE,
             )
             creds = flow.run_local_server(port=0)
         # Save the credentials for the next run
@@ -138,7 +118,7 @@ def initialize_upload(youtube):
     # if not os.path.exists(args.file):
     #     exit("Please specify a valid file using the --file= parameter.")
 
-    options=None
+    options = None
     tags = None
     if options.keywords:
         tags = options.keywords.split(",")
