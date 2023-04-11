@@ -93,6 +93,14 @@ def get_authenticated_service():
     )
 
 
+def _get_latest_mp4_path():
+    path_data_dir = Path(".")
+    list_path_mp4 = [path.absolute() for path in path_data_dir.glob("*.mp4")]
+    list_path_mp4.sort()
+    path_mp4_latest = list_path_mp4[-1]
+    return path_mp4_latest
+
+
 def initialize_upload(youtube):
     # argparser.add_argument("--file", required=True, help="Video file to upload")
     # argparser.add_argument("--title", help="Video title", default="Test Title")
@@ -118,7 +126,7 @@ def initialize_upload(youtube):
 
     # if not os.path.exists(args.file):
     #     exit("Please specify a valid file using the --file= parameter.")
-    path_mp4 = Path("20230408.mp4")
+    path_mp4 = _get_latest_mp4_path()
     body = dict(
         snippet=dict(
             title=path_mp4.stem,
