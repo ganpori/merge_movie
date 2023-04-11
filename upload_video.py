@@ -1,6 +1,7 @@
 import http.client
 import httplib2
 import os
+from pathlib import Path
 import pickle
 import random
 import time
@@ -117,20 +118,16 @@ def initialize_upload(youtube):
 
     # if not os.path.exists(args.file):
     #     exit("Please specify a valid file using the --file= parameter.")
-
-    options = None
-    tags = None
-    if options.keywords:
-        tags = options.keywords.split(",")
-
+    path_mp4 = Path("20230408.mp4")
     body = dict(
         snippet=dict(
-            title=options.title,
-            description=options.description,
-            tags=tags,
-            categoryId=options.category,
+            title=path_mp4.stem,
+            description="",
+            categoryId=17,  # 17はsports
         ),
-        status=dict(privacyStatus=options.privacyStatus),
+        status=dict(
+            privacyStatus=VALID_PRIVACY_STATUSES[0],  # public
+        ),
     )
 
     # Call the API's videos.insert method to create and upload the video.
@@ -148,7 +145,9 @@ def initialize_upload(youtube):
         # practice, but if you're using Python older than 2.6 or if you're
         # running on App Engine, you should set the chunksize to something like
         # 1024 * 1024 (1 megabyte).
-        media_body=MediaFileUpload(options.file, chunksize=-1, resumable=True),
+        media_body=MediaFileUpload(
+            filename=path_mp4.as_posix(), chunksize=-1, resumable=True
+        ),
     )
 
     resumable_upload(insert_request)
