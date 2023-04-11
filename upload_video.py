@@ -199,9 +199,15 @@ def resumable_upload(insert_request):
             time.sleep(sleep_seconds)
 
 
-if __name__ == "__main__":
+def main():
     youtube = get_authenticated_service()
     try:
         initialize_upload(youtube)
     except HttpError as e:
         print("An HTTP error %d occurred:\n%s" % (e.resp.status, e.content))
+
+    return
+
+
+if __name__ == "__main__":
+    main()

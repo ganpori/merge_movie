@@ -3,6 +3,8 @@ from pathlib import Path
 import subprocess
 import tempfile
 
+import upload_video
+
 
 def sort_list_path_gopro_mp4(list_path_mp4):
     dict_path_mtime = {
@@ -49,3 +51,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+    upload_video.main()
