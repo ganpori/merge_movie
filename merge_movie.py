@@ -27,8 +27,7 @@ def calc_file_mtime(path_file):
     return datetime_mtime
 
 
-def main():
-    path_data_dir = Path("G:/DCIM/DJI_001")
+def main(path_data_dir):
     list_path_mp4 = [path.absolute() for path in path_data_dir.glob("*.mp4")]
 
     # ffmpegに与えるファイル一覧txtの作成
@@ -49,6 +48,15 @@ def main():
     return
 
 
+def remove_all_files_in_dir(path_data_dir):
+    for path_data in path_data_dir.glob("*"):
+        print(f"remove {path_data}")
+        path_data.unlink()
+    return
+
+
 if __name__ == "__main__":
-    main()
+    path_data_dir = Path("G:/DCIM/DJI_001")
+    main(path_data_dir)
     upload_video.main()
+    remove_all_files_in_dir(path_data_dir)
