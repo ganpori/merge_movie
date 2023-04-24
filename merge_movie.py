@@ -56,7 +56,7 @@ def remove_all_files_in_dir(path_data_dir):
 
 
 if __name__ == "__main__":
-    path_data_dir = Path("G:/DCIM/DJI_001")
+    path_data_dir = Path("D:/DCIM/DJI_001")
     upload_video.get_authenticated_service()  # 早めに一回認証しておいて勝手にアップロードされるようにしておく
     main(path_data_dir)
     upload_video.main()
