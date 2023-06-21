@@ -35,7 +35,9 @@ def main(path_data_dir):
     list_txt_str = [
         f"file {path.as_posix()}\n" for path in list_path_mp4_sorted
     ]  # as_posixでバックスラッシュをやめないとffmpegが認識しない
-    with tempfile.TemporaryFile(mode="w+", encoding="utf-8", delete=False) as fp:
+    with tempfile.NamedTemporaryFile(
+        mode="w+", encoding="utf-8", delete=False
+    ) as fp:  # namedじゃないとdeleteオプションが存在しない
         str_path_file_list_txt = fp.name
         fp.writelines(list_txt_str)
 
@@ -60,4 +62,4 @@ if __name__ == "__main__":
     # upload_video.get_authenticated_service()  # 早めに一回認証しておいて勝手にアップロードされるようにしておく
     main(path_data_dir)
     # upload_video.main()
-    remove_all_files_in_dir(path_data_dir)
+    # remove_all_files_in_dir(path_data_dir)
