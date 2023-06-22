@@ -29,7 +29,7 @@ def calc_file_mtime(path_file):
 
 
 def main(path_data_dir):
-    list_path_mp4 = [path.absolute() for path in path_data_dir.glob("*.mp4")]
+    list_path_mp4 = [path.absolute() for path in path_data_dir.glob("*.MP4")]
 
     # ffmpegに与えるファイル一覧txtの作成
     list_path_mp4_sorted = sort_list_path_gopro_mp4(list_path_mp4=list_path_mp4)
