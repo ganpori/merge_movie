@@ -1,4 +1,5 @@
 import datetime
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -28,7 +29,7 @@ def calc_file_mtime(path_file):
 
 
 def main(path_data_dir):
-    list_path_mp4 = [path.absolute() for path in path_data_dir.glob("*.mp4")]
+    list_path_mp4 = [path.absolute() for path in path_data_dir.glob("*.MP4")]
 
     # ffmpegに与えるファイル一覧txtの作成
     list_path_mp4_sorted = sort_list_path_gopro_mp4(list_path_mp4=list_path_mp4)
@@ -46,7 +47,7 @@ def main(path_data_dir):
     path_output_mp4 = Path(f"{datetime_latest_file_mtime.strftime('%Y%m%d')}.mp4")
 
     str_ffmpeg_command = f"ffmpeg -f concat -safe 0 -i {str_path_file_list_txt} -c copy  {path_output_mp4}"
-    subprocess.run(str_ffmpeg_command)
+    subprocess.run(str_ffmpeg_command.split())  # raspi上ではlistに分割されてないと認識されないので分割する
     return
 
 
@@ -57,8 +58,16 @@ def remove_all_files_in_dir(path_data_dir):
     return
 
 
+def get_path_data_dir():
+    if os.name == "nt":
+        path_data_dir = Path("D:/DCIM/DJI_001")
+    elif os.name == "posix":
+        path_data_dir = Path("/media/taikirq/7000-8000/DCIM/DJI_001/")
+    return path_data_dir
+
+
 if __name__ == "__main__":
-    path_data_dir = Path("D:/DCIM/DJI_001")
+    path_data_dir = get_path_data_dir()
     # upload_video.get_authenticated_service()  # 早めに一回認証しておいて勝手にアップロードされるようにしておく
     main(path_data_dir)
     # upload_video.main()
