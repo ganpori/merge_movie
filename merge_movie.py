@@ -1,4 +1,5 @@
 import datetime
+import os
 from pathlib import Path
 import subprocess
 import tempfile
@@ -57,8 +58,16 @@ def remove_all_files_in_dir(path_data_dir):
     return
 
 
+def get_path_data_dir():
+    if os.name == "nt":
+        path_data_dir = Path("D:/DCIM/DJI_001")
+    elif os.name == "posix":
+        path_data_dir = Path("/media/taikirq/7000-8000/DCIM/DJI_001/")
+    return path_data_dir
+
+
 if __name__ == "__main__":
-    path_data_dir = Path("D:/DCIM/DJI_001")
+    path_data_dir = get_path_data_dir()
     # upload_video.get_authenticated_service()  # 早めに一回認証しておいて勝手にアップロードされるようにしておく
     main(path_data_dir)
     # upload_video.main()
