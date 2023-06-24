@@ -62,7 +62,13 @@ def get_path_data_dir():
     if os.name == "nt":
         path_data_dir = Path("D:/DCIM/DJI_001")
     elif os.name == "posix":
-        path_data_dir = Path("/media/taikirq/7000-8000/DCIM/DJI_001/")
+        path_data_dir = None
+        for path_sd_dir in Path("/media/taikirq/").glob("*"):
+            path_data_dir_candidate = path_sd_dir / "DCIM/DJI_001/"
+            if path_data_dir_candidate.exists():
+                path_data_dir = path_data_dir_candidate
+        if path_data_dir is None:
+            raise FileNotFoundError(f"data dir is not found")
     return path_data_dir
 
 
