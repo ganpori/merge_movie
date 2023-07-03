@@ -48,7 +48,7 @@ def main(path_data_dir):
 
     str_ffmpeg_command = f"ffmpeg -f concat -safe 0 -i {str_path_file_list_txt} -c copy  {path_output_mp4}"
     subprocess.run(str_ffmpeg_command.split())  # raspi上ではlistに分割されてないと認識されないので分割する
-    return
+    return path_output_mp4
 
 
 def remove_all_files_in_dir(path_data_dir):
@@ -75,6 +75,7 @@ def get_path_data_dir():
 if __name__ == "__main__":
     path_data_dir = get_path_data_dir()
     upload_video.get_authenticated_service()  # 早めに一回認証しておいて勝手にアップロードされるようにしておく
-    main(path_data_dir)
-    upload_video.main()
+    path_output_mp4 = main(path_data_dir)  # sdカードから結合して作成した動画のパスを返り値で取得。upload関数に渡す
+
+    upload_video.main(path_upload_file=path_output_mp4)
     remove_all_files_in_dir(path_data_dir)

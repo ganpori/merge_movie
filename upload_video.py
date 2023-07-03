@@ -101,7 +101,7 @@ def _get_latest_mp4_path():
     return path_mp4_latest
 
 
-def initialize_upload(youtube):
+def initialize_upload(youtube, path_upload_file):
     # argparser.add_argument("--file", required=True, help="Video file to upload")
     # argparser.add_argument("--title", help="Video title", default="Test Title")
     # argparser.add_argument(
@@ -126,10 +126,9 @@ def initialize_upload(youtube):
 
     # if not os.path.exists(args.file):
     #     exit("Please specify a valid file using the --file= parameter.")
-    path_mp4 = _get_latest_mp4_path()
     body = dict(
         snippet=dict(
-            title=path_mp4.stem,
+            title=path_upload_file.stem,
             description="",
             categoryId=17,  # 17はsports
         ),
@@ -154,7 +153,7 @@ def initialize_upload(youtube):
         # running on App Engine, you should set the chunksize to something like
         # 1024 * 1024 (1 megabyte).
         media_body=MediaFileUpload(
-            filename=path_mp4.as_posix(), chunksize=-1, resumable=True
+            filename=path_upload_file.as_posix(), chunksize=-1, resumable=True
         ),
     )
 
@@ -199,10 +198,13 @@ def resumable_upload(insert_request):
             time.sleep(sleep_seconds)
 
 
-def main():
+def main(path_upload_file=None):
+    if path_upload_file is None:  # 引数なかったら適当に最新の動画取得する
+        path_upload_file = _get_latest_mp4_path()
+    print(f"start upload {path_upload_file}")
     youtube = get_authenticated_service()
     try:
-        initialize_upload(youtube)
+        initialize_upload(youtube, path_upload_file=path_upload_file)
     except HttpError as e:
         print("An HTTP error %d occurred:\n%s" % (e.resp.status, e.content))
 
