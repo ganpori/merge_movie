@@ -76,7 +76,9 @@ if __name__ == "__main__":
     path_data_dir = get_path_data_dir()
     upload_video.get_authenticated_service()  # 早めに一回認証しておいて勝手にアップロードされるようにしておく
     path_output_mp4 = main(path_data_dir)  # sdカードから結合して作成した動画のパスを返り値で取得。upload関数に渡す
+    remove_all_files_in_dir(
+        path_data_dir
+    )  # 動画結合できたらその元データ削除。ただディスク容量満タンだったりすると結合できてなくても削除してしまう可能性あり。要注意。
 
     upload_video.main(path_upload_file=path_output_mp4)
     path_output_mp4.unlink()  # uploadがエラーなく成功したらその動画を削除。ラズパイ上で操作する数を減らすため。
-    remove_all_files_in_dir(path_data_dir)
