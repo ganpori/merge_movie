@@ -78,4 +78,5 @@ if __name__ == "__main__":
     path_output_mp4 = main(path_data_dir)  # sdカードから結合して作成した動画のパスを返り値で取得。upload関数に渡す
 
     upload_video.main(path_upload_file=path_output_mp4)
+    path_output_mp4.unlink()  # uploadがエラーなく成功したらその動画を削除。ラズパイ上で操作する数を減らすため。
     remove_all_files_in_dir(path_data_dir)
