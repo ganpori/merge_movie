@@ -27,11 +27,7 @@ def calc_file_mtime(path_file):
     return datetime_mtime
 
 
-def main(path_data_dir):
-    list_path_mp4 = [path.absolute() for path in path_data_dir.glob("*.MP4")]
-
-    # ffmpegに与えるファイル一覧txtの作成
-    list_path_mp4_sorted = sort_list_path_gopro_mp4(list_path_mp4=list_path_mp4)
+def _merge_movie_from_list_path(list_path_mp4_sorted):
     list_txt_str = [
         f"file {path.as_posix()}\n" for path in list_path_mp4_sorted
     ]  # as_posixでバックスラッシュをやめないとffmpegが認識しない
@@ -47,6 +43,19 @@ def main(path_data_dir):
 
     str_ffmpeg_command = f"ffmpeg -f concat -safe 0 -i {str_path_file_list_txt} -c copy  {path_output_mp4}"
     subprocess.run(str_ffmpeg_command.split())  # raspi上ではlistに分割されてないと認識されないので分割する
+    return path_output_mp4
+
+
+def main(path_data_dir):
+    list_path_mp4 = [path.absolute() for path in path_data_dir.glob("*.MP4")]
+
+    # ffmpegに与えるファイル一覧txtの作成
+    list_path_mp4_sorted = sort_list_path_gopro_mp4(list_path_mp4=list_path_mp4)
+    # 何種類あるか判断
+    # その種類の数に合わせてlistを分割
+    # listの数に合わせて結合を実行
+    path_output_mp4 = _merge_movie_from_list_path(list_path_mp4_sorted)
+
     return path_output_mp4
 
 
