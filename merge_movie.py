@@ -20,10 +20,9 @@ def calc_file_mtime(path_file):
     # atime	アクセス時間	指定日数内にアクセスされたファイル
     # ctime	作成時間	指定日数内に属性変更されたファイル
     # mtime	修正時間（iノード管理）	指定日数内に修正、更新されたファイル
-
-    latest_file_stat = path_file.stat()
+    file_stat = path_file.stat()
     datetime_mtime = datetime.datetime.fromtimestamp(
-        latest_file_stat.st_mtime
+        file_stat.st_mtime
     )  # mtimeはファイルの最終更新日時.JSTかUTC化に注意。windowsでやった時はなぜかJSTになってた
     return datetime_mtime
 
