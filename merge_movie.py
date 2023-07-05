@@ -39,7 +39,8 @@ def count_activity_number_by_mtime_diff(list_path_mp4_sorted):
     for mtime_diff in list_mtime_diff:
         if mtime_diff > threshold_time:
             activity_number += 1
-
+    if activity_number > 2:
+        raise ValueError(f"動画が３分割以上されてます。{activity_number=}")
     return activity_number
 
 
@@ -100,7 +101,7 @@ def get_path_data_dir():
 
 if __name__ == "__main__":
     path_data_dir = get_path_data_dir()
-    upload_video.get_authenticated_service()  # 早めに一回認証しておいて勝手にアップロードされるようにしておく
+    # upload_video.get_authenticated_service()  # 早めに一回認証しておいて勝手にアップロードされるようにしておく
     path_output_mp4 = main(path_data_dir)  # sdカードから結合して作成した動画のパスを返り値で取得。upload関数に渡す
     remove_all_files_in_dir(
         path_data_dir
