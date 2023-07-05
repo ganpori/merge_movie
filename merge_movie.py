@@ -27,6 +27,22 @@ def calc_file_mtime(path_file):
     return datetime_mtime
 
 
+def count_activity_number_by_mtime_diff(list_path_mp4_sorted):
+    # 活動は一回か二回のどちらかになるはずだからactivity_numberの値は1か2しか想定しない。
+    activity_number = 1
+    list_mtime = [calc_file_mtime(path_mp4) for path_mp4 in list_path_mp4_sorted]
+    list_mtime_diff = [
+        mtime - list_mtime[i - 1] for i, mtime in enumerate(list_mtime)
+    ]  # 0個めと-1個めの比較で-のdiffが出てくるけど判定時にマイナスであれば引っかからないから問題なし。ただ取扱注意。
+
+    threshold_time = datetime.timedelta(hours=1)
+    for mtime_diff in list_mtime_diff:
+        if mtime_diff > threshold_time:
+            activity_number += 1
+
+    return activity_number
+
+
 def _merge_movie_from_list_path(list_path_mp4_sorted):
     list_txt_str = [
         f"file {path.as_posix()}\n" for path in list_path_mp4_sorted
@@ -51,7 +67,9 @@ def main(path_data_dir):
 
     # ffmpegに与えるファイル一覧txtの作成
     list_path_mp4_sorted = sort_list_path_gopro_mp4(list_path_mp4=list_path_mp4)
-    # 何種類あるか判断
+    activity_number = count_activity_number_by_mtime_diff(
+        list_path_mp4_sorted
+    )  # 何種類あるか判断。1 or 2のみ想定
     # その種類の数に合わせてlistを分割
     # listの数に合わせて結合を実行
     path_output_mp4 = _merge_movie_from_list_path(list_path_mp4_sorted)
