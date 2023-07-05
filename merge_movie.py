@@ -78,8 +78,15 @@ def main(path_data_dir):
         path_output_mp4 = _merge_movie_from_list_path(list_path_mp4_sorted)
         return [path_output_mp4]  # リストで返してその中身をuploadするようにする
     elif activity_number == 2:
-        pass
-        return []
+        border_index = _get_border_index(list_path_mp4_sorted)
+
+        path_output_mp4_first = _merge_movie_from_list_path(
+            list_path_mp4_sorted[:border_index]
+        )
+        path_output_mp4_second = _merge_movie_from_list_path(
+            list_path_mp4_sorted[border_index:]
+        )
+        return [path_output_mp4_first, path_output_mp4_second]
     else:
         raise ValueError
 
