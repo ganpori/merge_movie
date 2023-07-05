@@ -72,10 +72,16 @@ def main(path_data_dir):
         list_path_mp4_sorted
     )  # 何種類あるか判断。1 or 2のみ想定
     # その種類の数に合わせてlistを分割
-    # listの数に合わせて結合を実行
-    path_output_mp4 = _merge_movie_from_list_path(list_path_mp4_sorted)
 
-    return path_output_mp4
+    # listの数に合わせて結合を実行
+    if activity_number == 1:
+        path_output_mp4 = _merge_movie_from_list_path(list_path_mp4_sorted)
+        return [path_output_mp4]  # リストで返してその中身をuploadするようにする
+    elif activity_number == 2:
+        pass
+        return []
+    else:
+        raise ValueError
 
 
 def remove_all_files_in_dir(path_data_dir):
@@ -102,10 +108,13 @@ def get_path_data_dir():
 if __name__ == "__main__":
     path_data_dir = get_path_data_dir()
     # upload_video.get_authenticated_service()  # 早めに一回認証しておいて勝手にアップロードされるようにしておく
-    path_output_mp4 = main(path_data_dir)  # sdカードから結合して作成した動画のパスを返り値で取得。upload関数に渡す
+    list_path_output_mp4 = main(
+        path_data_dir
+    )  # sdカードから結合して作成した動画のパスを返り値で取得。upload関数に渡す
     remove_all_files_in_dir(
         path_data_dir
     )  # 動画結合できたらその元データ削除。ただディスク容量満タンだったりすると結合できてなくても削除してしまう可能性あり。要注意。
 
-    upload_video.main(path_upload_file=path_output_mp4)
-    path_output_mp4.unlink()  # uploadがエラーなく成功したらその動画を削除。ラズパイ上で操作する数を減らすため。
+    for path_output_mp4 in list_path_output_mp4:
+        upload_video.main(path_upload_file=path_output_mp4)
+        path_output_mp4.unlink()  # uploadがエラーなく成功したらその動画を削除。ラズパイ上で操作する数を減らすため。
