@@ -20,19 +20,43 @@ def calc_file_mtime(path_file):
     # atime	アクセス時間	指定日数内にアクセスされたファイル
     # ctime	作成時間	指定日数内に属性変更されたファイル
     # mtime	修正時間（iノード管理）	指定日数内に修正、更新されたファイル
-
-    latest_file_stat = path_file.stat()
+    file_stat = path_file.stat()
     datetime_mtime = datetime.datetime.fromtimestamp(
-        latest_file_stat.st_mtime
+        file_stat.st_mtime
     )  # mtimeはファイルの最終更新日時.JSTかUTC化に注意。windowsでやった時はなぜかJSTになってた
     return datetime_mtime
 
 
-def main(path_data_dir):
-    list_path_mp4 = [path.absolute() for path in path_data_dir.glob("*.MP4")]
+def count_activity_number_by_mtime_diff(list_path_mp4_sorted):
+    # 活動は一回か二回のどちらかになるはずだからactivity_numberの値は1か2しか想定しない。
+    activity_number = 1
+    list_mtime = [calc_file_mtime(path_mp4) for path_mp4 in list_path_mp4_sorted]
+    list_mtime_diff = [
+        mtime - list_mtime[i - 1] for i, mtime in enumerate(list_mtime)
+    ]  # 0個めと-1個めの比較で-のdiffが出てくるけど判定時にマイナスであれば引っかからないから問題なし。ただ取扱注意。
 
-    # ffmpegに与えるファイル一覧txtの作成
-    list_path_mp4_sorted = sort_list_path_gopro_mp4(list_path_mp4=list_path_mp4)
+    threshold_time = datetime.timedelta(hours=1)
+    for mtime_diff in list_mtime_diff:
+        if mtime_diff > threshold_time:
+            activity_number += 1
+    if activity_number > 2:
+        raise ValueError(f"動画が３分割以上されてます。{activity_number=}")
+    return activity_number
+
+
+def _get_border_index(list_path_sorted):
+    threshold_time = datetime.timedelta(hours=1)
+    list_mtime = [calc_file_mtime(path_mp4) for path_mp4 in list_path_sorted]
+    for i, mtime in enumerate(list_mtime):
+        mtime_diff = (
+            mtime - list_mtime[i - 1]
+        )  # 0個めと-1個めの比較で-のdiffが出てくるけど判定時にマイナスであれば引っかからないから問題なし。ただ取扱注意。
+        if mtime_diff > threshold_time:
+            border_index = i
+    return border_index
+
+
+def _merge_movie_from_list_path(list_path_mp4_sorted):
     list_txt_str = [
         f"file {path.as_posix()}\n" for path in list_path_mp4_sorted
     ]  # as_posixでバックスラッシュをやめないとffmpegが認識しない
@@ -45,10 +69,41 @@ def main(path_data_dir):
     # 出力される動画データ名の作成
     datetime_latest_file_mtime = calc_file_mtime(list_path_mp4_sorted[0])
     path_output_mp4 = Path(f"{datetime_latest_file_mtime.strftime('%Y%m%d')}.mp4")
-
+    while path_output_mp4.exists():
+        path_output_mp4 = path_output_mp4.with_stem(
+            f"{path_output_mp4.stem}_"
+        )  # ファイル名に_を追加し続ける
     str_ffmpeg_command = f"ffmpeg -f concat -safe 0 -i {str_path_file_list_txt} -c copy  {path_output_mp4}"
     subprocess.run(str_ffmpeg_command.split())  # raspi上ではlistに分割されてないと認識されないので分割する
     return path_output_mp4
+
+
+def main(path_data_dir):
+    list_path_mp4 = [path.absolute() for path in path_data_dir.glob("*.MP4")]
+
+    # ffmpegに与えるファイル一覧txtの作成
+    list_path_mp4_sorted = sort_list_path_gopro_mp4(list_path_mp4=list_path_mp4)
+    activity_number = count_activity_number_by_mtime_diff(
+        list_path_mp4_sorted
+    )  # 何種類あるか判断。1 or 2のみ想定
+    # その種類の数に合わせてlistを分割
+
+    # listの数に合わせて結合を実行
+    if activity_number == 1:
+        path_output_mp4 = _merge_movie_from_list_path(list_path_mp4_sorted)
+        return [path_output_mp4]  # リストで返してその中身をuploadするようにする
+    elif activity_number == 2:
+        border_index = _get_border_index(list_path_mp4_sorted)
+
+        path_output_mp4_first = _merge_movie_from_list_path(
+            list_path_mp4_sorted[:border_index]
+        )
+        path_output_mp4_second = _merge_movie_from_list_path(
+            list_path_mp4_sorted[border_index:]
+        )
+        return [path_output_mp4_first, path_output_mp4_second]
+    else:
+        raise ValueError
 
 
 def remove_all_files_in_dir(path_data_dir):
@@ -75,10 +130,13 @@ def get_path_data_dir():
 if __name__ == "__main__":
     path_data_dir = get_path_data_dir()
     upload_video.get_authenticated_service()  # 早めに一回認証しておいて勝手にアップロードされるようにしておく
-    path_output_mp4 = main(path_data_dir)  # sdカードから結合して作成した動画のパスを返り値で取得。upload関数に渡す
+    list_path_output_mp4 = main(
+        path_data_dir
+    )  # sdカードから結合して作成した動画のパスを返り値で取得。upload関数に渡す
     remove_all_files_in_dir(
         path_data_dir
     )  # 動画結合できたらその元データ削除。ただディスク容量満タンだったりすると結合できてなくても削除してしまう可能性あり。要注意。
 
-    upload_video.main(path_upload_file=path_output_mp4)
-    path_output_mp4.unlink()  # uploadがエラーなく成功したらその動画を削除。ラズパイ上で操作する数を減らすため。
+    for path_output_mp4 in list_path_output_mp4:
+        upload_video.main(path_upload_file=path_output_mp4)
+        path_output_mp4.unlink()  # uploadがエラーなく成功したらその動画を削除。ラズパイ上で操作する数を減らすため。
