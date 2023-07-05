@@ -69,7 +69,10 @@ def _merge_movie_from_list_path(list_path_mp4_sorted):
     # 出力される動画データ名の作成
     datetime_latest_file_mtime = calc_file_mtime(list_path_mp4_sorted[0])
     path_output_mp4 = Path(f"{datetime_latest_file_mtime.strftime('%Y%m%d')}.mp4")
-
+    while path_output_mp4.exists():
+        path_output_mp4 = path_output_mp4.with_stem(
+            f"{path_output_mp4.stem}_"
+        )  # ファイル名に_を追加し続ける
     str_ffmpeg_command = f"ffmpeg -f concat -safe 0 -i {str_path_file_list_txt} -c copy  {path_output_mp4}"
     subprocess.run(str_ffmpeg_command.split())  # raspi上ではlistに分割されてないと認識されないので分割する
     return path_output_mp4
@@ -126,7 +129,7 @@ def get_path_data_dir():
 
 if __name__ == "__main__":
     path_data_dir = get_path_data_dir()
-    # upload_video.get_authenticated_service()  # 早めに一回認証しておいて勝手にアップロードされるようにしておく
+    upload_video.get_authenticated_service()  # 早めに一回認証しておいて勝手にアップロードされるようにしておく
     list_path_output_mp4 = main(
         path_data_dir
     )  # sdカードから結合して作成した動画のパスを返り値で取得。upload関数に渡す
