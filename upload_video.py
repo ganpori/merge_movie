@@ -75,7 +75,19 @@ def get_authenticated_service():
     # If there are no (valid) credentials available, let the user log in.
     if not creds or not creds.valid:
         if creds and creds.expired and creds.refresh_token:
-            creds.refresh(Request())
+            try:
+                creds.refresh(Request())
+            except Exception as e:
+                print(e)
+                # refreshに失敗したらとりあえずcredsを作り直す。oauthよくわからんからとりあえずこう。
+                # oauth本読んで少しでもわかったらちゃんとリフレッシュする方法作りたい。
+                print("credsを作り直す")
+                flow = InstalledAppFlow.from_client_secrets_file(
+                    CLIENT_SECRETS_FILE,
+                    scopes=YOUTUBE_UPLOAD_SCOPE,
+                )
+                creds = flow.run_local_server(port=0)
+
         else:
             flow = InstalledAppFlow.from_client_secrets_file(
                 CLIENT_SECRETS_FILE,
