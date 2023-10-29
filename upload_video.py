@@ -65,6 +65,14 @@ VALID_PRIVACY_STATUSES = ("public", "private", "unlisted")
 
 
 def get_authenticated_service():
+    # サーバーアプリでoauthするためのgoogle公式説明
+    # https://developers.google.com/youtube/v3/guides/auth/server-side-web-apps?hl=ja#python
+
+    #　oauthの説明、リフレッシュトークン、アクセストークン
+    # https://logmi.jp/tech/articles/325886  oauthの概要
+    # https://logmi.jp/tech/articles/325887　認可フローの説明
+    # https://logmi.jp/tech/articles/325888  リフレッシュトークンの説明
+
     creds = None
     # The file token.pickle stores the user's access and refresh tokens, and is
     # created automatically when the authorization flow completes for the first
@@ -73,7 +81,7 @@ def get_authenticated_service():
         with open("token.pickle", "rb") as token:
             creds = pickle.load(token)
     # If there are no (valid) credentials available, let the user log in.
-    if not creds or not creds.valid:
+    if not creds or not creds.valid:  # credsがNoneの場合でもorで先にnot credsが評価されるからcreds.validが存在しなくてもよい
         if creds and creds.expired and creds.refresh_token:
             try:
                 creds.refresh(Request())
@@ -97,7 +105,6 @@ def get_authenticated_service():
         # Save the credentials for the next run
         with open("token.pickle", "wb") as token:
             pickle.dump(creds, token)
-
     return build(
         YOUTUBE_API_SERVICE_NAME,
         YOUTUBE_API_VERSION,
