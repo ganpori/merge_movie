@@ -1,18 +1,19 @@
-[tool.poetry]
+[project]
 name = "merge_movie"
 version = "0.1.0"
 description = ""
-authors = ["Taiki <taiki.iwahori.bn@furuno.co.jp>"]
+authors = [{ name = "Taiki", email = "taiki.iwahori.bn@furuno.co.jp" }]
+requires-python = "~=3.11"
+dependencies = [
+    "black>=23.3.0,<24",
+    "google-api-python-client>=2.83.0,<3",
+    "google-auth-oauthlib>=1.0.0,<2",
+    "google-auth-httplib2>=0.1.0,<0.2",
+]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-black = "^23.3.0"
-google-api-python-client = "^2.83.0"
-google-auth-oauthlib = "^1.0.0"
-google-auth-httplib2 = "^0.1.0"
-
-[tool.poetry.dev-dependencies]
+[dependency-groups]
+dev = []
 
 [build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
+requires = ["hatchling"]
+build-backend = "hatchling.build"
